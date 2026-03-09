@@ -102,10 +102,27 @@ export default function MessageBubble({ message }: Props) {
         }`}
       >
         {isUser ? (
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          typeof message.content === "string" ? (
+            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          ) : (
+            <div className="space-y-2">
+              {message.content.map((block, i) =>
+                block.type === "image" ? (
+                  <img
+                    key={i}
+                    src={`data:${block.media_type};base64,${block.data}`}
+                    alt="添付画像"
+                    className="max-w-full rounded-lg max-h-64 object-contain"
+                  />
+                ) : (
+                  <p key={i} className="text-sm whitespace-pre-wrap">{block.text}</p>
+                )
+              )}
+            </div>
+          )
         ) : (
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-            {message.content}
+            {typeof message.content === "string" ? message.content : ""}
           </ReactMarkdown>
         )}
       </div>

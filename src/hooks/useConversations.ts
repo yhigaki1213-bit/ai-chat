@@ -52,7 +52,14 @@ function createConversation(): Conversation {
 function deriveTitle(messages: Message[]): string {
   const first = messages.find((m) => m.role === "user");
   if (!first) return "新しい会話";
-  return first.content.slice(0, 30) + (first.content.length > 30 ? "…" : "");
+  if (typeof first.content === "string") {
+    return first.content.slice(0, 30) + (first.content.length > 30 ? "…" : "");
+  }
+  const textBlock = first.content.find((b) => b.type === "text");
+  if (textBlock && textBlock.type === "text") {
+    return textBlock.text.slice(0, 30) + (textBlock.text.length > 30 ? "…" : "");
+  }
+  return "画像を送信しました";
 }
 
 /** Initialize conversations from sessionStorage (lazy initializer — client-only) */

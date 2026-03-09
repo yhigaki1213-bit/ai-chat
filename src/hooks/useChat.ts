@@ -1,7 +1,13 @@
 "use client";
 
 import { useReducer, useCallback, useEffect } from "react";
-import type { Message } from "@/app/api/chat/route";
+import type { Message, ImageMediaType, ContentBlock } from "@/app/api/chat/route";
+
+export interface ImageAttachment {
+  data: string;
+  media_type: ImageMediaType;
+  name: string;
+}
 
 // ---------------------------------------------------------------------------
 // State
@@ -51,7 +57,7 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case "APPEND_ASSISTANT_TEXT": {
       const messages = [...state.messages];
       const last = messages[messages.length - 1];
-      if (last?.role === "assistant") {
+      if (last?.role === "assistant" && typeof last.content === "string") {
         messages[messages.length - 1] = {
           ...last,
           content: last.content + action.payload,
@@ -107,11 +113,24 @@ export function useChat(
   }, [state.messages, state.isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string, images?: ImageAttachment[]) => {
       const trimmed = text.trim();
-      if (!trimmed || state.isLoading) return;
+      if (!trimmed && (!images || images.length === 0)) return;
+      if (state.isLoading) return;
 
-      const userMessage: Message = { role: "user", content: trimmed };
+      const hasImages = images && images.length > 0;
+      const content: string | ContentBlock[] = hasImages
+        ? [
+            ...images.map((img) => ({
+              type: "image" as const,
+              media_type: img.media_type,
+              data: img.data,
+            })),
+            ...(trimmed ? [{ type: "text" as const, text: trimmed }] : []),
+          ]
+        : trimmed;
+
+      const userMessage: Message = { role: "user", content };
       dispatch({ type: "ADD_USER_MESSAGE", payload: userMessage });
 
       const messagesForApi = [...state.messages, userMessage];

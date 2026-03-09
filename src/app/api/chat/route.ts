@@ -1,9 +1,24 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
 
+export type ImageMediaType = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+
+export interface TextBlock {
+  type: "text";
+  text: string;
+}
+
+export interface ImageBlock {
+  type: "image";
+  media_type: ImageMediaType;
+  data: string;
+}
+
+export type ContentBlock = TextBlock | ImageBlock;
+
 export interface Message {
   role: "user" | "assistant";
-  content: string;
+  content: string | ContentBlock[];
 }
 
 const client = new Anthropic({
@@ -27,7 +42,21 @@ export async function POST(req: NextRequest) {
       max_tokens: 8096,
       messages: messages.map((m) => ({
         role: m.role,
-        content: m.content,
+        content:
+          typeof m.content === "string"
+            ? m.content
+            : m.content.map((block) =>
+                block.type === "image"
+                  ? {
+                      type: "image" as const,
+                      source: {
+                        type: "base64" as const,
+                        media_type: block.media_type,
+                        data: block.data,
+                      },
+                    }
+                  : { type: "text" as const, text: block.text }
+              ),
       })),
     });
 

@@ -5,6 +5,7 @@ import ChatWindow from "@/components/ChatWindow";
 import MessageInput from "@/components/MessageInput";
 import Sidebar from "@/components/Sidebar";
 import { useChat } from "@/hooks/useChat";
+import type { ImageAttachment } from "@/hooks/useChat";
 import { useConversations } from "@/hooks/useConversations";
 
 export default function Home() {
@@ -26,11 +27,11 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (images: ImageAttachment[]) => {
     const text = input.trim();
-    if (!text || isLoading) return;
+    if ((!text && images.length === 0) || isLoading) return;
     setInput("");
-    await sendMessage(text);
+    await sendMessage(text, images);
   };
 
   const handleNew = () => {
