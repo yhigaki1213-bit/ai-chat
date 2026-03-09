@@ -79,7 +79,7 @@
 - [x] `.dockerignore` を作成
 - [x] `ANTHROPIC_API_KEY` を Secret Manager に登録
 - [x] Cloud Run へデプロイ（`gcloud run deploy`）
-- [ ] 動作確認
+- [x] 動作確認
 
 ---
 
