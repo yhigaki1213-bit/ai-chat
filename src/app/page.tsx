@@ -39,7 +39,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
+    <div className="flex h-dvh overflow-hidden bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
       <Sidebar
         conversations={conversations}
